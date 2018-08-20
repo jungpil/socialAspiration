@@ -25,7 +25,5 @@ Test.java
 hs_err_pid*
 
 # temp files
-landscape/*
 out/*
-conf.old/
 *.sh
