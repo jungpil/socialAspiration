@@ -6,8 +6,10 @@ import java.io.PrintWriter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 
 public class FileIO {
+	private static Properties p = new Properties();
 	public static void loadParameters(String configFile) {
 		/*
 		 *	double uncertainty = 0.5d;
@@ -16,16 +18,21 @@ public class FileIO {
 		 *	int numFirms = 10;
 		*/
 		if (!configFile.equals("")) {
-			Properties p = new Properties();
+			// Properties p = new Properties();
 			try {
 				p.load(new FileInputStream(configFile));
 				// simulation parameters
-				if (p.getProperty("numFirms") != null) { Globals.setNumFirms(Integer.parseInt(p.getProperty("numFirms"))); }
-				if (p.getProperty("iterations") != null) { Globals.setIterations(Integer.parseInt(p.getProperty("iterations"))); }
-				// if (p.getProperty("adaptation") != null) { Globals.setAdaptation(p.getProperty("adaptation")); }
-				if (p.getProperty("uncertainty") != null) { Globals.setInnovation(Double.parseDouble(p.getProperty("uncertainty"))); }
-				if (p.getProperty("numTraits") != null) { Globals.setResourcesIncrement(Integer.parseInt(p.getProperty("numTraits"))); }
-				if (p.getProperty("numTraitValues") != null) { Globals.setSearchScope(Integer.parseInt(p.getProperty("numTraitValues"))); }
+				// if (p.getProperty("experiment") != null) { Globals.setExperiment(p.getProperty("experiment")); }
+				if (p.getProperty("numTraits") != null) { Globals.setNumTraits(p.getProperty("numTraits")); } 
+				if (p.getProperty("numTraitValues") != null) { Globals.setNumTraitValues(p.getProperty("numTraitValues")); }
+				if (p.getProperty("replacement") != null) { Globals.setReplacement(p.getProperty("replacement")); }
+				if (p.getProperty("numFirmTypes") != null) { Globals.setNumFirmTypes(p.getProperty("numFirmTypes")); }
+				if (p.getProperty("iterations") != null) { Globals.setIterations(p.getProperty("iterations")); }
+				if (p.getProperty("numFirms") != null) { Globals.setNumFirms(p.getProperty("numFirms")); }
+				if (p.getProperty("socialDistance") != null) { Globals.setSocialDistance(p.getProperty("socialDistance")); }
+				if (p.getProperty("uncertainty") != null) { Globals.setUncertainty(p.getProperty("uncertainty")); }
+				if (p.getProperty("traitsToChange") != null) { Globals.setTraitsToChange(p.getProperty("traitsToChange")); }
+				if (p.getProperty("replacementCutoff") != null) { Globals.setReplacementCutoff(p.getProperty("replacementCutoff")); }
 				if (p.getProperty("outfile") != null) { Globals.setOutfile(p.getProperty("outfile")); }
 					else { Globals.setOutfile(""); }
 					
@@ -37,22 +44,10 @@ public class FileIO {
 	}
 	
 	public static void printParameters() {
-		Set<Entry<Object, Object>> entries = props.entrySet();
+		Set<Entry<Object, Object>> entries = p.entrySet();
     	for (Entry<Object, Object> entry : entries) {
       		System.out.println(entry.getKey() + " : " + entry.getValue());
     	}
-
-		System.out.println("N: " + Globals.getN());
-		System.out.println("initResources: " + Globals.getInitResources());
-		System.out.println("numFirms: " + Globals.getNumFirms());
-		System.out.println("iterations: " + Globals.getIterations());
-		System.out.println("innovation: " + Globals.getInnovation());
-		System.out.println("resourcesIncrement: " + Globals.getResourcesIncrement());
-		System.out.println("searchScope: " + Globals.getSearchScope());
-		// System.out.println("adaptation: " + Globals.getAdaptation());
-		System.out.println("resourceDecision: " + Globals.getResourceDecision());
-		System.out.println("resourceThreshold: " + Globals.getResourceThreshold());
-		System.out.println("outfile: " + Globals.getOutfilename());
 	}
 
 	public static void main(String[] args) {
