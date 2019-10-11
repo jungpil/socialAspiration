@@ -6,13 +6,14 @@ import java.util.*;
 public class Firm implements Comparable<Firm> {
 	private int id;
 	private int type; // type index
-	private int typeString; // string representing the type of firm (in terms of socialDistance and traitsToChange)
+	// private int typeString; // string representing the type of firm (in terms of socialDistance and traitsToChange)
 	// private int firmID;
-	private double socialDistance; // tolerance for similarity (differences) to be considered in the reference group
-	private int traitsToChange;
-	private int[] traits; 
+	// private double socialDistance; // tolerance for similarity (differences) to be considered in the reference group
+	// private int traitsToChange;
+	// private int[] traits; 
 	private double performance; 
 	private double strategy; 
+	private int rankingTier; // ranking tier will simply be an integer from 0, 1, ... that represents different performance ranking tiers
 
 	// control property for syncing strategy change at industry level 
 	private boolean changeStrategy = false;	
@@ -20,19 +21,22 @@ public class Firm implements Comparable<Firm> {
 	/* 
 	 * CONSTRUCTOR
 	 */
+	// public Firm(int idx, int aType, double aSocialDistance, int aNumTraitsToChange) {
+	public Firm(int idx, int aType) {
 
-	public Firm(int idx, int aType, double aSocialDistance, int aNumTraitsToChange) {
 		id = idx;
 		type = aType;
 		// firmID = id;
-		socialDistance = aSocialDistance;
-		traitsToChange = aNumTraitsToChange;
+		// socialDistance = aSocialDistance;
+		// traitsToChange = aNumTraitsToChange;
 
 		// set initial traits and trait values
-		traits = new int[Globals.getNumTraits()];
-		for (int i = 0; i < traits.length; i++) {
-			traits[i] = Globals.rand.nextInt(Globals.getNumTraitValues());
-		}
+		// traits = new int[Globals.getNumTraits()];
+		// for (int i = 0; i < traits.length; i++) {
+		// 	traits[i] = Globals.rand.nextInt(Globals.getNumTraitValues());
+		// }
+
+		// draw initial strategy and performance 
 		strategy = Globals.rand.nextGaussian();	
 		performance = strategy + (Globals.getUncertainty() * Globals.rand.nextGaussian());
 	}
@@ -42,23 +46,23 @@ public class Firm implements Comparable<Firm> {
 	 */
 
 	private void newStrategy() {
-		// change traits 
+		//// change traits 
 		// determine traits to change 
-		boolean boolTraitsToChange[] = new boolean[traits.length];
-		int count = 0; 
-		while (count < traitsToChange) {
-			int changeTrait = Globals.rand.nextInt(traits.length);
-			if (!boolTraitsToChange[changeTrait]) {
-				boolTraitsToChange[changeTrait] = true;
-				count++;
-			}
-		}
+		// boolean boolTraitsToChange[] = new boolean[traits.length];
+		// int count = 0; 
+		// while (count < traitsToChange) {
+		// 	int changeTrait = Globals.rand.nextInt(traits.length);
+		// 	if (!boolTraitsToChange[changeTrait]) {
+		// 		boolTraitsToChange[changeTrait] = true;
+		// 		count++;
+		// 	}
+		// }
 
-		for (int i = 0; i < traits.length; i++) {
-			if (boolTraitsToChange[i]) {
-				traits[i] = (traits[i] + Globals.rand.nextInt(Globals.getNumTraitValues() - 1) + 1) % Globals.getNumTraitValues();
-			}
-		}
+		// for (int i = 0; i < traits.length; i++) {
+		// 	if (boolTraitsToChange[i]) {
+		// 		traits[i] = (traits[i] + Globals.rand.nextInt(Globals.getNumTraitValues() - 1) + 1) % Globals.getNumTraitValues();
+		// 	}
+		// }
 
 		// draw new strategy value
 		strategy = Globals.rand.nextGaussian();	
@@ -78,7 +82,10 @@ public class Firm implements Comparable<Firm> {
 		// use  Log(P(change)/P(no change)) = -2.0 - (Yt-Lt)_Iyt>Lt - 0.25*(Yt- L)_It<Lt
 		double socialAsp = 0.0d;
 		int count = 0;
-		// System.out.println("SELF:\t" + toString());
+		
+
+		// The following calculates social aspiration as average of group 
+		// depending on type (global vs. tier; top vs. average) we need to change this.
 		for (Firm f : market) {
 			if (id != f.getIdx()) { // exclude self
 	    		if (isNeighbor(f)) {
@@ -114,19 +121,24 @@ public class Firm implements Comparable<Firm> {
 	}
 
 	private boolean isNeighbor(Firm otherFirm) {
-		int countSame = 0; 
-		for (int i = 0; i < traits.length; i++) {
-			if (traits[i] == otherFirm.getTraitValueAt(i)) {
-				countSame++;
-			}
-		}
-		if (((double)countSame / (double)traits.length) >= socialDistance) {
-			// System.out.println("Yes, Firm " + toString() + " is a neighbor of Firm " + otherFirm.toString());
+		if (rankingTier == otherFirm.getRankingTier()) {
 			return true;
 		} else {
-			// System.out.println("No, Firm " + toString() + " is NOT a neighbor of Firm " + otherFirm.toString());
 			return false;
 		}
+		// int countSame = 0; 
+		// for (int i = 0; i < traits.length; i++) {
+		// 	if (traits[i] == otherFirm.getTraitValueAt(i)) {
+		// 		countSame++;
+		// 	}
+		// }
+		// if (((double)countSame / (double)traits.length) >= socialDistance) {
+		// 	// System.out.println("Yes, Firm " + toString() + " is a neighbor of Firm " + otherFirm.toString());
+		// 	return true;
+		// } else {
+		// 	// System.out.println("No, Firm " + toString() + " is NOT a neighbor of Firm " + otherFirm.toString());
+		// 	return false;
+		// }
 	}
 
 	/*
@@ -140,6 +152,13 @@ public class Firm implements Comparable<Firm> {
 		return type;
 	}
 
+	public int getRankingTier() {
+		return rankingTier;
+	}
+
+	public void setRankingTier(int tier) {
+		rankingTier = tier;
+	}
 	// public int getID() {
 	// 	return firmID;
 	// }
