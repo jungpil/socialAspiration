@@ -23,7 +23,8 @@ public class Simulation {
 		for (int i = 0; i < Globals.getNumFirmTypes(); i++) {
 			for (int j = 0; j < Globals.getNumFirmsOfType(i); j++) {
 				// add firms of type i, socialDistance, numTraitsToChange as defined in config file 
-				firms.add(new Firm(firmCounter++, i, Globals.getSocialDistanceForType(i), Globals.getNumTraitsToChangeForType(i)));	
+				// firms.add(new Firm(firmCounter++, i, Globals.getSocialDistanceForType(i), Globals.getNumTraitsToChangeForType(i)));	
+				firms.add(new Firm(firmCounter++, i, Globals.getReferenceScopeForType(i), Globals.getComparisonTargetForType(i)));
 				firmTypeCounts[i]++;
 			}
 		}
@@ -108,7 +109,7 @@ public class Simulation {
 		for (int i = 0; i < Globals.getNumTotalFirms() - numRemainingFirms; i++) {
 			int typeToAdd = getType(Globals.rand.nextDouble(), proportions);
 			//Firm(int aType, int id, double aSocialDistance, int aNumTraitsToChange)
-			firms.add(new Firm(firmCounter++, typeToAdd, Globals.getSocialDistanceForType(typeToAdd), Globals.getNumTraitsToChangeForType(typeToAdd)));
+			firms.add(new Firm(firmCounter++, typeToAdd, Globals.getReferenceScopeForType(typeToAdd), Globals.getComparisonTargetForType(typeToAdd)));
 			firmTypeCounts[typeToAdd]++;
 		}
 	}
@@ -139,7 +140,7 @@ public class Simulation {
 		for (int i = 0; i < Globals.getNumTotalFirms() - numRemainingFirms; i++) {
 			int typeToAdd = getType(Globals.rand.nextDouble(), proportions);
 			//Firm(int aType, int id, double aSocialDistance, int aNumTraitsToChange)
-			firms.add(new Firm(firmCounter++, typeToAdd, Globals.getSocialDistanceForType(typeToAdd), Globals.getNumTraitsToChangeForType(typeToAdd)));
+			firms.add(new Firm(firmCounter++, typeToAdd, Globals.getReferenceScopeForType(typeToAdd), Globals.getComparisonTargetForType(typeToAdd)));
 			firmTypeCounts[typeToAdd]++;
 		}
 	}

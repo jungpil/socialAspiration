@@ -31,12 +31,16 @@ public class Globals {
 	 * Model Parameters and Default values 
 	 */
 
-	private static int numTraits = 10; // N
-	private static int numTraitValues = 2; // K 
-	private static int[] numFirms = new int[] {200, 200, 200, 200, 200};
+	// private static int numTraits = 10; // N
+	// private static int numTraitValues = 2; // K 
+	private static int[] numFirms = new int[] {20, 20, 20, 20, 20};
+	private static int[] rankToTier = new int[100]; 
 	private static int numTotalFirms;
-	private static double[] socialDistance = new double[] {0.5d, 0.6d, 0.7d, 0.8d, 0.9d};
-	private static int[] traitsToChange = new int[] {1, 1, 1, 1, 1};
+	// private static double[] socialDistance = new double[] {0.5d, 0.6d, 0.7d, 0.8d, 0.9d};
+	private static String[] referenceScope = new String[] {"global", "global", "tier", "tier"};
+	private static String[] comparisonTarget = new String[] {"top", "avg", "top", "avg"};
+	private static int[] tiering = new int[] {10, 25, 50, 100};
+	// private static int[] traitsToChange = new int[] {1, 1, 1, 1, 1};
 	private static double uncertainty = 0.5d;
 
 	/*
@@ -47,13 +51,13 @@ public class Globals {
 		return numFirms[type];
 	}
 
-	public static double getSocialDistanceForType(int idx) {
-		return socialDistance[idx];
-	}
+	// public static double getSocialDistanceForType(int idx) {
+	// 	return socialDistance[idx];
+	// }
 
-	public static int getNumTraitsToChangeForType(int idx) {
-		return traitsToChange[idx];
-	}
+	// public static int getNumTraitsToChangeForType(int idx) {
+	// 	return traitsToChange[idx];
+	// }
 
 	// public static String getExperiment() {
 	// 	return experiment;
@@ -96,8 +100,10 @@ public class Globals {
 		    	System.exit(0);
 			} else {
 				numFirms = new int[numFirmTypes];
-				socialDistance = new double[numFirmTypes];
-				traitsToChange = new int[numFirmTypes];
+				// socialDistance = new double[numFirmTypes];
+				// traitsToChange = new int[numFirmTypes];
+				referenceScope = new String[numFirmTypes];
+				comparisonTarget = new String[numFirmTypes];
 			}
 		} catch (NumberFormatException e) {
 	    	System.err.println("INVALID PARAMETER ERROR: numFirmTypes (" + s + ") must be an integer (>0)!");
@@ -129,6 +135,8 @@ public class Globals {
 						type++;
 					}
 				}
+				// init rankToTier
+				rankToTier = new int[numTotalFirms];
 			} catch (NumberFormatException e) {
 		    	System.err.println("INVALID PARAMETER ERROR: numFirms (" + s + ") must be an integer (>0)!");
 		    	System.exit(0);
@@ -179,98 +187,182 @@ public class Globals {
 		replacementCutoff = d;
 	}
 
-	public static double getSocialDistance(int idx) {
-		return socialDistance[idx];
+	public static String getReferenceScopeForType(int idx) {
+		return referenceScope[idx];
 	}
 
-	public static void setSocialDistance(String s) {
+	public static void setReferenceScope(String s) {
 		StringTokenizer st = new StringTokenizer(s, ",");
 		if (numFirmTypes == st.countTokens()) {
-			try {
-				int type = 0;
-				while (st.hasMoreElements()) {
-					double dist = Double.parseDouble(st.nextToken());
-					if (dist < 0 || dist > 1) {
-				    	System.err.println("INVALID PARAMETER ERROR: socialDistance (" + dist + ") must be between 0 and 1!");
-				    	System.exit(0);
-					} else {
-						socialDistance[type] = dist;
-						type++;
-					}
+			int type = 0;
+			while (st.hasMoreElements()) {
+				String aScope = st.nextToken();
+				if (aScope.equals("global") || aScope.equals("tier")) {
+					referenceScope[type] = aScope;
+					type++;
+				} else {
+			    	System.err.println("INVALID PARAMETER ERROR: referenceScope (" + aScope + ") must be either \"global\" or \"tier\"");
+			    	System.exit(0);
 				}
-			} catch (NumberFormatException e) {
-		    	System.err.println("INVALID PARAMETER ERROR: socialDistance (" + s + ") must be an double between 0 and 1!");
-		    	System.exit(0);
 			}
 		} else {
-	    	System.err.println("INVALID PARAMETER ERROR: number of socialDistance (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
+	    	System.err.println("INVALID PARAMETER ERROR: number of referenceScope (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
 	    	System.exit(0);
 		}
 	}
-
-	public static int getNumTraits() {
-		return numTraits;
+	
+	public static String getComparisonTargetForType(int idx) {
+		return comparisonTarget[idx];
 	}
 
-	public static void setNumTraits(String s) {
-		try {
-			numTraits = Integer.parseInt(s);
-			if (numTraits <= 0) {
-		    	System.err.println("INVALID PARAMETER ERROR: numTraits (" + numTraits + ") must be positive!");
-		    	System.exit(0);
-			}
-		} catch (NumberFormatException e) {
-	    	System.err.println("INVALID PARAMETER ERROR: numTraits (" + s + ") must be an integer (>0)!");
-	    	System.exit(0);
-		}
-	}
-
-	public static int getNumTraitValues() {
-		return numTraitValues;
-	}
-
-	public static void setNumTraitValues(String s) {
-		try {
-			numTraitValues = Integer.parseInt(s);
-			if (numTraitValues < 2) {
-		    	System.err.println("INVALID PARAMETER ERROR: numTraitValues (" + numTraitValues + ") must be positive and at least 2!");
-		    	System.exit(0);
-			}
-		} catch (NumberFormatException e) {
-	    	System.err.println("INVALID PARAMETER ERROR: numTraitValues (" + s + ") must be an integer (>0)!");
-	    	System.exit(0);
-		}
-	}
-
-	public static int getTraitsToChangeAt(int idx) {
-		return traitsToChange[idx];
-	}
-
-	public static void setTraitsToChange(String s) {
+	public static void setComparisonTarget(String s) {
 		StringTokenizer st = new StringTokenizer(s, ",");
 		if (numFirmTypes == st.countTokens()) {
-			try {
-				int type = 0;
-				while (st.hasMoreElements()) {
-					int toChange = Integer.parseInt(st.nextToken());
-					if (toChange <= 0 || toChange >= numTraits) {
-				    	System.err.println("INVALID PARAMETER ERROR: traitsToChange (" + toChange + ") must be positive and less than " + numTraits + "!");
-				    	System.exit(0);
-					} else {
-						traitsToChange[type] = toChange;
-						type++;
-					}
+			int type = 0;
+			while (st.hasMoreElements()) {
+				String aComparisonTarget = st.nextToken();
+				if (aComparisonTarget.equals("top") || aComparisonTarget.equals("avg")) {
+					comparisonTarget[type] = aComparisonTarget;
+					type++;
+				} else {
+			    	System.err.println("INVALID PARAMETER ERROR: comparisonTarget (" + aComparisonTarget + ") must be either \"top\" or \"avg\"");
+			    	System.exit(0);
 				}
-			} catch (NumberFormatException e) {
-		    	System.err.println("INVALID PARAMETER ERROR: traitsToChange (" + s + ") must be an integer (>0)!");
-		    	System.exit(0);
 			}
 		} else {
-	    	System.err.println("INVALID PARAMETER ERROR: number of traitsToChange (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
+	    	System.err.println("INVALID PARAMETER ERROR: number of comparisonTarget (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
+	    	System.exit(0);
+		}
+	}
+	
+	public static void setTiering(String s) {
+		StringTokenizer st = new StringTokenizer(s, ",");
+		try {
+			int lastKnownTierMax = 0;
+			int i = 0;
+			int tier = 0;
+			while (st.hasMoreElements()) {
+				int num = Integer.parseInt(st.nextToken());
+				if (num <= lastKnownTierMax || num <= 0) {
+					System.err.println("INVALID PARAMETER ERROR: tier (" + num + ") must be positive and increasing!");
+					System.exit(0);
+				} else {
+					for (int j = i; j < num; j++) {
+						rankToTier[j] = tier;
+					}
+					tier++;
+				}
+				lastKnownTierMax = num;
+				i = num;
+			} 
+			if (lastKnownTierMax != rankToTier.length) {
+				for (int j = i; j < rankToTier.length; j++) {
+					rankToTier[j] = tier;
+				}
+			}
+		} catch (NumberFormatException e) {
+	    	System.err.println("INVALID PARAMETER ERROR: tiers (" + s + ") must be positive integers (>0)!");
 	    	System.exit(0);
 		}
 
+		for (int i = 0; i < rankToTier.length; i++) {
+			System.out.println(i + "\t" + rankToTier[i]);
+		}	
 	}
+
+
+	// public static double getSocialDistance(int idx) {
+	// 	return socialDistance[idx];
+	// }
+
+	// public static void setSocialDistance(String s) {
+	// 	StringTokenizer st = new StringTokenizer(s, ",");
+	// 	if (numFirmTypes == st.countTokens()) {
+	// 		try {
+	// 			int type = 0;
+	// 			while (st.hasMoreElements()) {
+	// 				double dist = Double.parseDouble(st.nextToken());
+	// 				if (dist < 0 || dist > 1) {
+	// 			    	System.err.println("INVALID PARAMETER ERROR: socialDistance (" + dist + ") must be between 0 and 1!");
+	// 			    	System.exit(0);
+	// 				} else {
+	// 					socialDistance[type] = dist;
+	// 					type++;
+	// 				}
+	// 			}
+	// 		} catch (NumberFormatException e) {
+	// 	    	System.err.println("INVALID PARAMETER ERROR: socialDistance (" + s + ") must be an double between 0 and 1!");
+	// 	    	System.exit(0);
+	// 		}
+	// 	} else {
+	//     	System.err.println("INVALID PARAMETER ERROR: number of socialDistance (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
+	//     	System.exit(0);
+	// 	}
+	// }
+
+	// public static int getNumTraits() {
+	// 	return numTraits;
+	// }
+
+	// public static void setNumTraits(String s) {
+	// 	try {
+	// 		numTraits = Integer.parseInt(s);
+	// 		if (numTraits <= 0) {
+	// 	    	System.err.println("INVALID PARAMETER ERROR: numTraits (" + numTraits + ") must be positive!");
+	// 	    	System.exit(0);
+	// 		}
+	// 	} catch (NumberFormatException e) {
+	//     	System.err.println("INVALID PARAMETER ERROR: numTraits (" + s + ") must be an integer (>0)!");
+	//     	System.exit(0);
+	// 	}
+	// }
+
+	// public static int getNumTraitValues() {
+	// 	return numTraitValues;
+	// }
+
+	// public static void setNumTraitValues(String s) {
+	// 	try {
+	// 		numTraitValues = Integer.parseInt(s);
+	// 		if (numTraitValues < 2) {
+	// 	    	System.err.println("INVALID PARAMETER ERROR: numTraitValues (" + numTraitValues + ") must be positive and at least 2!");
+	// 	    	System.exit(0);
+	// 		}
+	// 	} catch (NumberFormatException e) {
+	//     	System.err.println("INVALID PARAMETER ERROR: numTraitValues (" + s + ") must be an integer (>0)!");
+	//     	System.exit(0);
+	// 	}
+	// }
+
+	// public static int getTraitsToChangeAt(int idx) {
+	// 	return traitsToChange[idx];
+	// }
+
+	// public static void setTraitsToChange(String s) {
+	// 	StringTokenizer st = new StringTokenizer(s, ",");
+	// 	if (numFirmTypes == st.countTokens()) {
+	// 		try {
+	// 			int type = 0;
+	// 			while (st.hasMoreElements()) {
+	// 				int toChange = Integer.parseInt(st.nextToken());
+	// 				if (toChange <= 0 || toChange >= numTraits) {
+	// 			    	System.err.println("INVALID PARAMETER ERROR: traitsToChange (" + toChange + ") must be positive and less than " + numTraits + "!");
+	// 			    	System.exit(0);
+	// 				} else {
+	// 					traitsToChange[type] = toChange;
+	// 					type++;
+	// 				}
+	// 			}
+	// 		} catch (NumberFormatException e) {
+	// 	    	System.err.println("INVALID PARAMETER ERROR: traitsToChange (" + s + ") must be an integer (>0)!");
+	// 	    	System.exit(0);
+	// 		}
+	// 	} else {
+	//     	System.err.println("INVALID PARAMETER ERROR: number of traitsToChange (" + st.countTokens() + ") must match numFirmTypes (" + numFirmTypes + ")!");
+	//     	System.exit(0);
+	// 	}
+
+	// }
 
 	public static int getIterations() {
 		return iterations;
@@ -315,18 +407,24 @@ public class Globals {
 		System.out.println("replacement:\t" + replacement);
 		System.out.println("replacementCutoff:\t" + replacementCutoff);
 		System.out.println("numFirmTypes:\t" + numFirmTypes);
-		System.out.println("numTraits:\t" + numTraits);
-		System.out.println("numTraitValues:\t" + numTraitValues);
+		// System.out.println("numTraits:\t" + numTraits);
+		// System.out.println("numTraitValues:\t" + numTraitValues);
 		System.out.println("numTotalFirms:\t" + numTotalFirms);
 		System.out.print("numFirms:\t");
 			for (int i = 0; i < numFirms.length - 1; i++) { System.out.print(numFirms[i] + ","); }
 			System.out.println(numFirms[numFirms.length - 1]);
-		System.out.print("socialDistance:\t");
-			for (int i = 0; i < socialDistance.length - 1; i++) { System.out.print(socialDistance[i] + ","); }
-			System.out.println(socialDistance[socialDistance.length - 1]);
-		System.out.print("traitsToChange:\t");
-			for (int i = 0; i < traitsToChange.length - 1; i++) { System.out.print(traitsToChange[i] + ","); }
-			System.out.println(traitsToChange[traitsToChange.length - 1]);
+		// System.out.print("socialDistance:\t");
+		// 	for (int i = 0; i < socialDistance.length - 1; i++) { System.out.print(socialDistance[i] + ","); }
+		// 	System.out.println(socialDistance[socialDistance.length - 1]);
+		// System.out.print("traitsToChange:\t");
+		// 	for (int i = 0; i < traitsToChange.length - 1; i++) { System.out.print(traitsToChange[i] + ","); }
+		// 	System.out.println(traitsToChange[traitsToChange.length - 1]);
+		System.out.print("referenceScope:\t");
+			for (int i = 0; i < referenceScope.length - 1; i++) { System.out.print(referenceScope[i] + ","); }
+			System.out.println(referenceScope[referenceScope.length - 1]);
+		System.out.print("comparisonTarget:\t");
+			for (int i = 0; i < comparisonTarget.length - 1; i++) { System.out.print(comparisonTarget[i] + ","); }
+			System.out.println(comparisonTarget[comparisonTarget.length - 1]);
 	}
 
 }

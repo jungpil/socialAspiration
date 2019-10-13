@@ -6,6 +6,11 @@ import java.util.*;
 public class Firm implements Comparable<Firm> {
 	private int id;
 	private int type; // type index
+
+	// with referenceScope and comparisonTarget, firms determine how they set their aspiration levels -- e.g., global-top, global-avg, tier-top, tier-avg
+	private String referenceScope; // either "global" or "tier"
+	private String comparisonTarget; // either "top" or "avg"
+	
 	// private int typeString; // string representing the type of firm (in terms of socialDistance and traitsToChange)
 	// private int firmID;
 	// private double socialDistance; // tolerance for similarity (differences) to be considered in the reference group
@@ -22,10 +27,12 @@ public class Firm implements Comparable<Firm> {
 	 * CONSTRUCTOR
 	 */
 	// public Firm(int idx, int aType, double aSocialDistance, int aNumTraitsToChange) {
-	public Firm(int idx, int aType) {
+	public Firm(int idx, int aType, String refScope, String compTarget) {
 
 		id = idx;
 		type = aType;
+		referenceScope = refScope;
+		comparisonTarget = compTarget;
 		// firmID = id;
 		// socialDistance = aSocialDistance;
 		// traitsToChange = aNumTraitsToChange;
@@ -82,7 +89,7 @@ public class Firm implements Comparable<Firm> {
 		// use  Log(P(change)/P(no change)) = -2.0 - (Yt-Lt)_Iyt>Lt - 0.25*(Yt- L)_It<Lt
 		double socialAsp = 0.0d;
 		int count = 0;
-		
+		double topPerformance = -100.0d;
 
 		// The following calculates social aspiration as average of group 
 		// depending on type (global vs. tier; top vs. average) we need to change this.
@@ -93,12 +100,21 @@ public class Firm implements Comparable<Firm> {
 	    			count++;
 	    			double perf = f.getPerformance(); 
 	    			socialAsp += perf;
+	    			if (perf > topPerformance) {
+	    				topPerformance = perf;
+	    			}
 	    			// System.out.println("adding:\t" + perf);
 	    		}
 			}
 		}
-		// ***** what if count == 0 --> there are no neighbors?
-		socialAsp = socialAsp / count;
+		
+		if (comparisonTarget.equals("top")) {
+			socialAsp = topPerformance;
+		} else {  // comparisonTarget = "avg"
+			// ***** what if count == 0 --> there are no neighbors?
+			socialAsp = socialAsp / count;
+		}
+		
 		double slope = -1.0d;
 		if (performance - socialAsp <= 0) {
 			slope = -0.25d;
@@ -121,10 +137,14 @@ public class Firm implements Comparable<Firm> {
 	}
 
 	private boolean isNeighbor(Firm otherFirm) {
-		if (rankingTier == otherFirm.getRankingTier()) {
+		if (referenceScope.equals("global")) {
 			return true;
-		} else {
-			return false;
+		} else { // referenceScope = "tier" 
+			if (rankingTier == otherFirm.getRankingTier()) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 		// int countSame = 0; 
 		// for (int i = 0; i < traits.length; i++) {
@@ -163,13 +183,14 @@ public class Firm implements Comparable<Firm> {
 	// 	return firmID;
 	// }
 
-	public double getSocialDistance() {
-		return socialDistance;
-	}
+	// public double getSocialDistance() {
+	// 	return socialDistance;
+	// }
 
-	public int getNumTraitsToChange() {
-		return traitsToChange;
-	}
+	// public int getNumTraitsToChange() {
+	// 	return traitsToChange;
+	// }
+
 	public double getPerformance() {
 		return performance; 
 	}
@@ -178,15 +199,15 @@ public class Firm implements Comparable<Firm> {
 		return strategy;
 	}
 
-	protected int getTraitValueAt(int idx) {
-		try {
-			int retInt = traits[idx];
-		} catch (ArrayIndexOutOfBoundsException e) {
-	    	System.err.println("ERROR: firm does not have trait " + idx);
-	    	System.exit(0);			
-		}
-		return traits[idx];
-	}
+	// protected int getTraitValueAt(int idx) {
+	// 	try {
+	// 		int retInt = traits[idx];
+	// 	} catch (ArrayIndexOutOfBoundsException e) {
+	//     	System.err.println("ERROR: firm does not have trait " + idx);
+	//     	System.exit(0);			
+	// 	}
+	// 	return traits[idx];
+	// }
 
 	/* 
 	 * interface method; implements Comparable
@@ -207,11 +228,12 @@ public class Firm implements Comparable<Firm> {
 	 * Printer
 	 */
 	public String toString() {
-		String retString = id + "\t" + type + "\t["; 
-		for (int i = 0; i < traits.length - 1; i++) {
-			retString += traits[i] + ",";
-		}
-		retString += traits[traits.length - 1] + "]\t" + strategy + "\t" + performance + "\t";
+		// String retString = id + "\t" + type + "\t["; 
+		// for (int i = 0; i < traits.length - 1; i++) {
+		// 	retString += traits[i] + ",";
+		// }
+		// retString += traits[traits.length - 1] + "]\t" + strategy + "\t" + performance + "\t";
+		String retString = id + "\t" + type + "\t" + referenceScope + "\t" + comparisonTarget + "\t" + strategy + "\t" + performance + "\t";
 		if (changeStrategy) { retString += "1"; } else { retString += "0"; }
 		return retString;
 	}
@@ -221,12 +243,12 @@ public class Firm implements Comparable<Firm> {
 	 */
 	public static void main(String[] args) {
 		// Firm(int aType, int id, double aSocialDistance, int aNumTraitsToChange)	
-		Firm f1 = new Firm(0, 0, 0.2, 2);
-		Firm f2 = new Firm(1, 0, 0.2, 2);
+		Firm f1 = new Firm(0, 0, "global", "top");
+		Firm f2 = new Firm(1, 0, "tier", "avg");
 		System.out.println(f1.toString());
 		System.out.println(f2.toString());
-		if(f1.isNeighbor(f2)) {
-			System.out.println("TRUE");
-		}
+		// if(f1.isNeighbor(f2)) {
+		// 	System.out.println("TRUE");
+		// }
 	}
 }
