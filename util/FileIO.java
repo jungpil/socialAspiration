@@ -34,6 +34,7 @@ public class FileIO {
 				if (p.getProperty("tiering") != null) { Globals.setTiering(p.getProperty("tiering")); }
 				// if (p.getProperty("socialDistance") != null) { Globals.setSocialDistance(p.getProperty("socialDistance")); }
 				if (p.getProperty("uncertainty") != null) { Globals.setUncertainty(p.getProperty("uncertainty")); }
+				if (p.getProperty("rankingFrequency") != null) { Globals.setRankingFrequency(p.getProperty("rankingFrequency")); }
 				// if (p.getProperty("traitsToChange") != null) { Globals.setTraitsToChange(p.getProperty("traitsToChange")); }
 				if (p.getProperty("replacementCutoff") != null) { Globals.setReplacementCutoff(p.getProperty("replacementCutoff")); }
 				if (p.getProperty("outfile") != null) { Globals.setOutfile(p.getProperty("outfile")); }

@@ -25,7 +25,8 @@ public class Globals {
 	private static String replacement = "number"; // number or strategy
 	private static int numFirmTypes = 1; // >1 if only experiment = "between"
 	private static double replacementCutoff = 100; // 1.28;  // parameter c in Greve (2002) -- replace orgs with perf < meanPerf - c*stdPerf
-												   // setting it to a really high number guarantees that there will not be any replacement
+													   // setting it to a really high number guarantees that there will not be any replacement
+	private static int rankingFrequency = 1;
 
 	/*
 	 * Model Parameters and Default values 
@@ -187,6 +188,24 @@ public class Globals {
 		replacementCutoff = d;
 	}
 
+
+	public static int getRankingFrequency() {
+		return rankingFrequency;
+	}
+
+	public static void setRankingFrequency(String s) {
+		try {
+			rankingFrequency = Integer.parseInt(s);
+			if (rankingFrequency <= 0) {
+		    	System.err.println("INVALID PARAMETER ERROR: iterations (" + iterations + ") must be a positive integer!");
+		    	System.exit(0);
+			}
+		} catch (NumberFormatException e) {
+	    	System.err.println("INVALID PARAMETER ERROR: iterations (" + s + ") must be an integer (>0)!");
+	    	System.exit(0);
+		}
+	}
+
 	public static String getReferenceScopeForType(int idx) {
 		return referenceScope[idx];
 	}
@@ -235,6 +254,12 @@ public class Globals {
 		}
 	}
 	
+
+	public static int getTierFromRank(int aRank) {
+		// returns the tier of a particular rank
+		return rankToTier[aRank];
+	}
+
 	public static void setTiering(String s) {
 		StringTokenizer st = new StringTokenizer(s, ",");
 		try {

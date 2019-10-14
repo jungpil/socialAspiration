@@ -24,17 +24,17 @@ public class Simulation {
 			for (int j = 0; j < Globals.getNumFirmsOfType(i); j++) {
 				// add firms of type i, socialDistance, numTraitsToChange as defined in config file 
 				// firms.add(new Firm(firmCounter++, i, Globals.getSocialDistanceForType(i), Globals.getNumTraitsToChangeForType(i)));	
+				// constructor will draw initial strategy and performance.			
 				firms.add(new Firm(firmCounter++, i, Globals.getReferenceScopeForType(i), Globals.getComparisonTargetForType(i)));
 				firmTypeCounts[i]++;
 			}
 		}
 		
+		// t = 0
+		// initially set ranks for each firm
+		setRanks("all");
 		reportDetails(0);
 		reportAggregate(0);
-		// for (Firm f : firms) {
-		// 	System.out.println(f.toString());
-		// }
-		// System.out.println("\n\n");
 		
 		/**
 		 *  RUN ITERATIONS
@@ -48,6 +48,11 @@ public class Simulation {
 			for (Firm f : firms) {
 				f.drawPerformance();
 				StatCalc.enter(f.getPerformance());
+			}
+
+			if ((t % Globals.getRankingFrequency()) == 0) {
+				System.out.println("setting ranks and ranking tiers (" + t + ")");
+				setRanks("all");
 			}
 
 			//// GIVEN PERFORMANCE, DETERMINE WHETHER FIRM SHOULD CHANGE STRATEGY
@@ -86,6 +91,8 @@ public class Simulation {
 				replaceByStrategy();
 			}
 			//Collections.sort(firms);
+			setRanks("new");
+			// new replacement firms need a rank and ranking tier
 
 			//// END OF PERIOD REPORTING
 			reportDetails(t);
@@ -164,6 +171,22 @@ public class Simulation {
 			} 
 		}
 		return retInt;
+	}
+
+	private static void setRanks(String allOrNew) {
+		Collections.sort(firms);
+		int rank = 0; 
+		for (Firm f : firms) {
+			if (allOrNew.equals("all")) {
+				f.setRankAndTier(rank);
+			} else { // new
+				if (f.isNew()) {
+					f.setRankAndTier(rank);
+				}
+			}
+			rank++;
+		}
+
 	}
 
 	private static void reportAggregate(int tick) {

@@ -6,6 +6,7 @@ import java.util.*;
 public class Firm implements Comparable<Firm> {
 	private int id;
 	private int type; // type index
+	private int age; // how many periods a firm is alive
 
 	// with referenceScope and comparisonTarget, firms determine how they set their aspiration levels -- e.g., global-top, global-avg, tier-top, tier-avg
 	private String referenceScope; // either "global" or "tier"
@@ -19,6 +20,8 @@ public class Firm implements Comparable<Firm> {
 	private double performance; 
 	private double strategy; 
 	private int rankingTier; // ranking tier will simply be an integer from 0, 1, ... that represents different performance ranking tiers
+	private int rank;
+	private boolean newFirm; // need this so that new replacement firms can be assigned a rank and ranking tier
 
 	// control property for syncing strategy change at industry level 
 	private boolean changeStrategy = false;	
@@ -46,6 +49,7 @@ public class Firm implements Comparable<Firm> {
 		// draw initial strategy and performance 
 		strategy = Globals.rand.nextGaussian();	
 		performance = strategy + (Globals.getUncertainty() * Globals.rand.nextGaussian());
+		newFirm = true;
 	}
 
 	/*
@@ -77,6 +81,8 @@ public class Firm implements Comparable<Firm> {
 
 	public void drawPerformance() { // at each time t, each firm draws a performance score based on its strategy (+ uncertainty)
 		changeStrategy = false; // setting to false here as this is the first thing that happens in each time tick
+		newFirm = false; // setting to false here 
+		age++;
 		double eps = Globals.rand.nextGaussian();
 		// System.out.println("eps: " + eps);
 
@@ -172,24 +178,19 @@ public class Firm implements Comparable<Firm> {
 		return type;
 	}
 
+	public int getRank() {
+		return rank;
+	}
+
 	public int getRankingTier() {
 		return rankingTier;
 	}
 
-	public void setRankingTier(int tier) {
-		rankingTier = tier;
+	public void setRankAndTier(int aRank) {
+		rank = aRank;
+		rankingTier = Globals.getTierFromRank(aRank);
+		System.out.println("setting rank for firm (" + id + ") with rank: " + aRank + ", ranking tier: " + rankingTier);
 	}
-	// public int getID() {
-	// 	return firmID;
-	// }
-
-	// public double getSocialDistance() {
-	// 	return socialDistance;
-	// }
-
-	// public int getNumTraitsToChange() {
-	// 	return traitsToChange;
-	// }
 
 	public double getPerformance() {
 		return performance; 
@@ -209,6 +210,9 @@ public class Firm implements Comparable<Firm> {
 	// 	return traits[idx];
 	// }
 
+	public boolean isNew() {
+		return newFirm;
+	}
 	/* 
 	 * interface method; implements Comparable
 	 */
@@ -233,7 +237,7 @@ public class Firm implements Comparable<Firm> {
 		// 	retString += traits[i] + ",";
 		// }
 		// retString += traits[traits.length - 1] + "]\t" + strategy + "\t" + performance + "\t";
-		String retString = id + "\t" + type + "\t" + referenceScope + "\t" + comparisonTarget + "\t" + strategy + "\t" + performance + "\t";
+		String retString = id + "\t" + type + "\t" + referenceScope + "\t" + comparisonTarget + "\t" + strategy + "\t" + performance + "\t" + "\t" + age + "\t" + rankingTier + "\t" + rank + "\t";
 		if (changeStrategy) { retString += "1"; } else { retString += "0"; }
 		return retString;
 	}
